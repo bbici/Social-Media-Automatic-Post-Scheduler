@@ -3,11 +3,11 @@ import emailjs from '@emailjs/browser';
 
 const STORAGE_KEY = 'omnipost_email_config';
 
-// Default / Demo keys (Placeholders)
+// Default keys provided by user
 const DEFAULT_CONFIG = {
-  serviceId: 'service_demo_omnipost',
-  templateId: 'template_verification',
-  publicKey: 'user_demo_key_12345'
+  serviceId: 'service_demo_omnipost', // Note: You might need to update this to your specific Service ID (e.g., 'service_gmail')
+  templateId: 'template_lb9y1pu',
+  publicKey: '2g4ntCEQeQPWjMuJM'
 };
 
 export interface EmailConfig {
@@ -31,13 +31,13 @@ export const clearEmailConfig = () => {
 
 export const isEmailConfigured = (): boolean => {
   const config = getEmailConfig();
-  return config.serviceId !== DEFAULT_CONFIG.serviceId && 
-         config.publicKey !== DEFAULT_CONFIG.publicKey;
+  // Consider configured if the key is not the old placeholder
+  return config.publicKey !== 'user_demo_key_12345' && config.publicKey.length > 5;
 };
 
 export const sendVerificationEmail = async (name: string, email: string, code: string): Promise<boolean> => {
   const config = getEmailConfig();
-  console.log(`[EmailService] Attempting to send code to ${email} using Service ID: ${config.serviceId}...`);
+  console.log(`[EmailService] Attempting to send code to ${email}...`);
   
   try {
     // Attempt to send real email using EmailJS
