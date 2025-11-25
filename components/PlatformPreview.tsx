@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { AdaptedPost, UserSettings } from '../types';
-import { Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, Repeat2, Send, CheckCircle2, Loader2, CalendarClock } from 'lucide-react';
+import { Heart, MessageCircle, Share2, MoreHorizontal, Bookmark, Repeat2, Send, CheckCircle2, Loader2, CalendarClock, Globe, ThumbsUp, MapPin } from 'lucide-react';
 
 interface PlatformPreviewProps {
   post: AdaptedPost;
@@ -36,6 +37,19 @@ const PlatformIcon = ({ platform }: { platform: string }) => {
         <svg viewBox="0 0 24 24" aria-hidden="true" className="w-4 h-4 fill-slate-900">
           <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z"/>
         </svg>
+      );
+    case 'facebook':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="w-4 h-4 fill-[#1877F2]">
+          <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+        </svg>
+      );
+    case 'googlebusiness':
+      return (
+         <svg viewBox="0 0 24 24" aria-hidden="true" className="w-4 h-4 fill-none stroke-[#4285F4] stroke-[2]">
+           <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+           <circle cx="12" cy="10" r="3"></circle>
+         </svg>
       );
     default: 
       return <Share2 size={18} />;
@@ -176,6 +190,77 @@ const PlatformPreview: React.FC<PlatformPreviewProps> = ({ post, user, onPost, i
     </div>
   );
 
+  const renderFacebook = () => (
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-slate-300 transition-colors h-full flex flex-col shadow-sm">
+      <div className="p-4 flex items-start gap-3">
+        <img src={user.avatar} alt={user.userName} className="w-10 h-10 rounded-full border border-slate-200" />
+        <div className="flex-1">
+          <div className="flex justify-between items-start">
+             <div>
+               <h3 className="font-semibold text-slate-900 text-sm">{user.userName}</h3>
+               <p className="text-xs text-slate-500 flex items-center gap-1">Just now • <Globe size={10} /></p>
+             </div>
+             <MoreHorizontal size={20} className="text-slate-500" />
+          </div>
+        </div>
+      </div>
+      
+      <div className="px-4 pb-3 text-[15px] text-slate-900 whitespace-pre-wrap leading-relaxed">
+        {post.content}
+        {post.hashtags.length > 0 && (
+           <p className="mt-2 text-blue-600">
+             {post.hashtags.map(tag => `#${tag.replace('#', '')} `)}
+           </p>
+        )}
+      </div>
+
+      {post.mediaUrl && (
+        <div className="w-full mt-1">
+          <SmartMediaDisplay 
+              url={post.mediaUrl} 
+              type={post.mediaType as 'image'|'video'} 
+              contain={false}
+          />
+        </div>
+      )}
+
+      <div className="px-4 py-2 border-t border-slate-100 flex items-center justify-between text-slate-500 text-sm font-medium mt-auto">
+        <button className="flex items-center gap-2 hover:bg-slate-50 px-2 py-2 rounded flex-1 justify-center text-slate-600"><ThumbsUp size={18}/> Like</button>
+        <button className="flex items-center gap-2 hover:bg-slate-50 px-2 py-2 rounded flex-1 justify-center text-slate-600"><MessageCircle size={18}/> Comment</button>
+        <button className="flex items-center gap-2 hover:bg-slate-50 px-2 py-2 rounded flex-1 justify-center text-slate-600"><Share2 size={18}/> Share</button>
+      </div>
+    </div>
+  );
+
+  const renderGoogleBusiness = () => (
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-slate-300 transition-colors h-full flex flex-col shadow-sm">
+       <div className="p-4 border-b border-slate-100 flex items-center gap-3">
+         <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
+           {user.userName.charAt(0)}
+         </div>
+         <div>
+            <h3 className="text-sm font-bold text-slate-800">{user.userName}</h3>
+            <p className="text-xs text-slate-500 flex items-center gap-1"><MapPin size={10} /> Business Profile</p>
+         </div>
+       </div>
+
+       {post.mediaUrl && (
+        <div className="w-full h-48">
+          <img src={post.mediaUrl} className="w-full h-full object-cover" alt="Update" />
+        </div>
+       )}
+
+       <div className="p-4">
+          <span className="text-xs font-bold text-blue-600 uppercase mb-2 block">Latest Update</span>
+          <p className="text-sm text-slate-800 whitespace-pre-wrap mb-4 line-clamp-6">{post.content}</p>
+          
+          <button className="w-full py-2 bg-slate-100 text-blue-600 font-semibold rounded text-sm hover:bg-slate-200 transition-colors">
+            Learn more
+          </button>
+       </div>
+    </div>
+  );
+
   const renderInstagram = () => (
     <div className="bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-slate-300 transition-colors h-full flex flex-col max-w-sm mx-auto w-full shadow-sm">
       <div className="p-3 flex items-center justify-between">
@@ -271,7 +356,7 @@ const PlatformPreview: React.FC<PlatformPreviewProps> = ({ post, user, onPost, i
             <div className="p-1.5 bg-white rounded-md shadow-sm">
               <PlatformIcon platform={post.platform} />
             </div>
-            <span className="font-bold capitalize text-slate-700 text-sm">{post.platform}</span>
+            <span className="font-bold capitalize text-slate-700 text-sm">{post.platform === 'googlebusiness' ? 'Google Business' : post.platform}</span>
          </div>
          {post.isPosted ? (
            post.scheduledTime ? (
@@ -299,8 +384,10 @@ const PlatformPreview: React.FC<PlatformPreviewProps> = ({ post, user, onPost, i
          {/* Render Specific Card */}
          {post.platform === 'twitter' && renderTwitter()}
          {post.platform === 'linkedin' && renderLinkedIn()}
+         {post.platform === 'facebook' && renderFacebook()}
          {post.platform === 'instagram' && renderInstagram()}
          {post.platform === 'tiktok' && renderTikTok()}
+         {post.platform === 'googlebusiness' && renderGoogleBusiness()}
       </div>
     </div>
   );

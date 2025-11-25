@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { DraftContent, Platform, PostTemplate, SavedDraft } from '../types';
 import { getTemplates, saveTemplate, deleteTemplate } from '../services/templateService';
@@ -14,7 +15,7 @@ const CreationStudio: React.FC<CreationStudioProps> = ({ onGenerate, isGeneratin
   const [media, setMedia] = useState<string | undefined>(undefined);
   const [originalMedia, setOriginalMedia] = useState<string | undefined>(undefined); // Allow undo
   const [mediaType, setMediaType] = useState<'image' | 'video' | 'none'>('none');
-  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(['twitter', 'linkedin', 'instagram', 'tiktok']);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(['twitter', 'linkedin', 'facebook', 'instagram', 'tiktok']);
   const [isEditing, setIsEditing] = useState(false);
   const [scheduledTime, setScheduledTime] = useState<string>('');
   
@@ -339,7 +340,7 @@ const CreationStudio: React.FC<CreationStudioProps> = ({ onGenerate, isGeneratin
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-3">Target Platforms</label>
           <div className="flex flex-wrap gap-3">
-            {(['twitter', 'linkedin', 'instagram', 'tiktok'] as Platform[]).map(p => (
+            {(['twitter', 'linkedin', 'facebook', 'instagram', 'tiktok', 'googlebusiness'] as Platform[]).map(p => (
               <button
                 key={p}
                 onClick={() => togglePlatform(p)}
@@ -349,7 +350,7 @@ const CreationStudio: React.FC<CreationStudioProps> = ({ onGenerate, isGeneratin
                     : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                 }`}
               >
-                {p}
+                {p === 'googlebusiness' ? 'Google Business' : p}
               </button>
             ))}
           </div>
@@ -400,135 +401,41 @@ const CreationStudio: React.FC<CreationStudioProps> = ({ onGenerate, isGeneratin
         </button>
       </div>
 
-      {/* Templates Modal */}
+      {/* Templates Modal (Code omitted for brevity, logic identical to previous) */}
+      {/* Drafts Modal (Code omitted for brevity, logic identical to previous) */}
+      
+      {/* ... keeping template/draft modals identical to previous implementation ... */}
       {showTemplates && (
         <div className="absolute inset-0 z-20 bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden animate-fade-in">
           <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
              <h3 className="font-bold text-slate-800 flex items-center gap-2"><LayoutTemplate size={18}/> Template Library</h3>
              <button onClick={() => setShowTemplates(false)} className="p-1 hover:bg-slate-200 rounded-full transition-colors"><X size={20}/></button>
           </div>
-          
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-             {/* New Template Form */}
              <div className="bg-indigo-50 border border-indigo-100 rounded-lg p-3 mb-4">
                {!isSavingTemplate ? (
-                 <button 
-                   onClick={() => setIsSavingTemplate(true)}
-                   disabled={!text}
-                   className="w-full py-2 flex items-center justify-center gap-2 text-indigo-700 font-medium hover:bg-indigo-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                 >
-                   <Plus size={16} /> Save Current Draft as Template
-                 </button>
+                 <button onClick={() => setIsSavingTemplate(true)} disabled={!text} className="w-full py-2 flex items-center justify-center gap-2 text-indigo-700 font-medium hover:bg-indigo-100 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"><Plus size={16} /> Save Current Draft as Template</button>
                ) : (
-                 <div className="flex gap-2">
-                   <input 
-                    type="text" 
-                    placeholder="Template Name..." 
-                    className="flex-1 p-2 border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    value={newTemplateName}
-                    onChange={(e) => setNewTemplateName(e.target.value)}
-                    autoFocus
-                   />
-                   <button onClick={handleSaveTemplate} className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"><Check size={16}/></button>
-                   <button onClick={() => setIsSavingTemplate(false)} className="p-2 bg-white text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50"><X size={16}/></button>
-                 </div>
+                 <div className="flex gap-2"><input type="text" placeholder="Template Name..." className="flex-1 p-2 border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" value={newTemplateName} onChange={(e) => setNewTemplateName(e.target.value)} autoFocus /><button onClick={handleSaveTemplate} className="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"><Check size={16}/></button><button onClick={() => setIsSavingTemplate(false)} className="p-2 bg-white text-slate-500 border border-slate-200 rounded-lg hover:bg-slate-50"><X size={16}/></button></div>
                )}
              </div>
-
-             {/* Template List */}
-             {templates.length === 0 ? (
-               <p className="text-center text-slate-400 py-8 text-sm">No templates found.</p>
-             ) : (
-               templates.map(t => (
-                 <div key={t.id} className="group border border-slate-200 rounded-lg p-3 hover:border-indigo-300 hover:shadow-sm transition-all bg-white">
-                    <div className="flex justify-between items-start mb-2">
-                       <h4 className="font-semibold text-slate-800 text-sm">{t.name}</h4>
-                       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <button onClick={(e) => handleDeleteTemplate(t.id, e)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md"><Trash2 size={14}/></button>
-                       </div>
-                    </div>
-                    <p className="text-xs text-slate-500 line-clamp-2 mb-3 bg-slate-50 p-2 rounded border border-slate-100 font-mono">
-                      {t.content}
-                    </p>
-                    <button 
-                      onClick={() => handleLoadTemplate(t)}
-                      className="w-full py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-indigo-600 hover:text-white rounded transition-colors flex items-center justify-center gap-1"
-                    >
-                      Use Template <ChevronRight size={12}/>
-                    </button>
-                 </div>
-               ))
-             )}
+             {templates.length === 0 ? <p className="text-center text-slate-400 py-8 text-sm">No templates found.</p> : templates.map(t => (<div key={t.id} className="group border border-slate-200 rounded-lg p-3 hover:border-indigo-300 hover:shadow-sm transition-all bg-white"><div className="flex justify-between items-start mb-2"><h4 className="font-semibold text-slate-800 text-sm">{t.name}</h4><div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><button onClick={(e) => handleDeleteTemplate(t.id, e)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md"><Trash2 size={14}/></button></div></div><p className="text-xs text-slate-500 line-clamp-2 mb-3 bg-slate-50 p-2 rounded border border-slate-100 font-mono">{t.content}</p><button onClick={() => handleLoadTemplate(t)} className="w-full py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-indigo-600 hover:text-white rounded transition-colors flex items-center justify-center gap-1">Use Template <ChevronRight size={12}/></button></div>))}
           </div>
         </div>
       )}
 
-      {/* Drafts Modal */}
       {(showDrafts || isSavingDraft) && (
         <div className="absolute inset-0 z-20 bg-white rounded-xl shadow-lg border border-slate-200 flex flex-col overflow-hidden animate-fade-in">
           <div className="p-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
              <h3 className="font-bold text-slate-800 flex items-center gap-2"><FolderOpen size={18}/> {isSavingDraft ? 'Save Draft' : 'Saved Drafts'}</h3>
              <button onClick={() => { setShowDrafts(false); setIsSavingDraft(false); }} className="p-1 hover:bg-slate-200 rounded-full transition-colors"><X size={20}/></button>
           </div>
-          
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
-             
-             {/* Save Draft Mode */}
              {isSavingDraft ? (
-               <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-1">Draft Name (Optional)</label>
-                    <input 
-                      type="text" 
-                      placeholder="e.g. Weekly Update" 
-                      className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
-                      value={newDraftName}
-                      onChange={(e) => setNewDraftName(e.target.value)}
-                      autoFocus
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <button onClick={handleSaveDraft} className="flex-1 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700">Save Draft</button>
-                    <button onClick={() => setIsSavingDraft(false)} className="flex-1 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg hover:bg-slate-200">Cancel</button>
-                  </div>
-               </div>
+               <div className="space-y-4"><div><label className="block text-sm font-medium text-slate-700 mb-1">Draft Name (Optional)</label><input type="text" placeholder="e.g. Weekly Update" className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none" value={newDraftName} onChange={(e) => setNewDraftName(e.target.value)} autoFocus /></div><div className="flex gap-2"><button onClick={handleSaveDraft} className="flex-1 py-2 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700">Save Draft</button><button onClick={() => setIsSavingDraft(false)} className="flex-1 py-2 bg-slate-100 text-slate-600 font-bold rounded-lg hover:bg-slate-200">Cancel</button></div></div>
              ) : (
                <>
-                 {/* Draft List */}
-                 {drafts.length === 0 ? (
-                   <p className="text-center text-slate-400 py-8 text-sm">No saved drafts.</p>
-                 ) : (
-                   drafts.map(d => (
-                     <div key={d.id} className="group border border-slate-200 rounded-lg p-3 hover:border-indigo-300 hover:shadow-sm transition-all bg-white">
-                        <div className="flex justify-between items-start mb-2">
-                           <div>
-                              <h4 className="font-semibold text-slate-800 text-sm">{d.name}</h4>
-                              <span className="text-xs text-slate-400">{new Date(d.lastModified).toLocaleDateString()}</span>
-                           </div>
-                           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                             <button onClick={(e) => handleDeleteDraft(d.id, e)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md"><Trash2 size={14}/></button>
-                           </div>
-                        </div>
-                        <div className="flex gap-2 mb-3">
-                          {d.content.mediaType !== 'none' && (
-                             <div className="text-xs bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded flex items-center gap-1"><ImageIcon size={10}/> Media</div>
-                          )}
-                          <div className="text-xs bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded flex items-center gap-1">
-                             {d.platforms.length} Platforms
-                          </div>
-                        </div>
-                        <p className="text-xs text-slate-500 line-clamp-2 mb-3 bg-slate-50 p-2 rounded border border-slate-100 font-mono">
-                          {d.content.text || '(No text)'}
-                        </p>
-                        <button 
-                          onClick={() => handleLoadDraft(d)}
-                          className="w-full py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-indigo-600 hover:text-white rounded transition-colors flex items-center justify-center gap-1"
-                        >
-                          Load Draft <ChevronRight size={12}/>
-                        </button>
-                     </div>
-                   ))
-                 )}
+                 {drafts.length === 0 ? <p className="text-center text-slate-400 py-8 text-sm">No saved drafts.</p> : drafts.map(d => (<div key={d.id} className="group border border-slate-200 rounded-lg p-3 hover:border-indigo-300 hover:shadow-sm transition-all bg-white"><div className="flex justify-between items-start mb-2"><div><h4 className="font-semibold text-slate-800 text-sm">{d.name}</h4><span className="text-xs text-slate-400">{new Date(d.lastModified).toLocaleDateString()}</span></div><div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity"><button onClick={(e) => handleDeleteDraft(d.id, e)} className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md"><Trash2 size={14}/></button></div></div><div className="flex gap-2 mb-3">{d.content.mediaType !== 'none' && (<div className="text-xs bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded flex items-center gap-1"><ImageIcon size={10}/> Media</div>)}<div className="text-xs bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded flex items-center gap-1">{d.platforms.length} Platforms</div></div><p className="text-xs text-slate-500 line-clamp-2 mb-3 bg-slate-50 p-2 rounded border border-slate-100 font-mono">{d.content.text || '(No text)'}</p><button onClick={() => handleLoadDraft(d)} className="w-full py-1.5 text-xs font-bold text-slate-600 bg-slate-100 hover:bg-indigo-600 hover:text-white rounded transition-colors flex items-center justify-center gap-1">Load Draft <ChevronRight size={12}/></button></div>))}
                </>
              )}
           </div>

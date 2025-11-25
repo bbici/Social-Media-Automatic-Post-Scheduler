@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { ApiConfig } from '../types';
 
@@ -12,7 +13,9 @@ const defaultApiConfig: ApiConfig = {
   twitter: { bearerToken: '' },
   linkedin: { accessToken: '', personUrn: '' },
   instagram: { accessToken: '', accountId: '' },
-  tiktok: { accessToken: '', openId: '' }
+  tiktok: { accessToken: '', openId: '' },
+  facebook: { accessToken: '', pageId: '' },
+  googlebusiness: { accessToken: '', locationId: '' }
 };
 
 export const ApiProvider: React.FC<{ children: ReactNode }> = ({ children }) => {

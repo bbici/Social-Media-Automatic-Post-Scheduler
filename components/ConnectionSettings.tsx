@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { ApiConfig } from '../types';
 import { useApiConfig } from '../contexts/ApiContext';
 import { initiateOAuthFlow } from '../services/socialAuthService';
-import { X, Check, AlertTriangle, Link2, ChevronRight, Loader2, Instagram, Linkedin, Twitter, Video, Shield, Key } from 'lucide-react';
+import { X, Check, AlertTriangle, Link2, ChevronRight, Loader2, Instagram, Linkedin, Twitter, Video, Shield, Key, Facebook, Store } from 'lucide-react';
 
 interface ConnectionSettingsProps {
   isOpen: boolean;
@@ -56,6 +57,8 @@ const ConnectionSettings: React.FC<ConnectionSettingsProps> = ({ isOpen, onClose
     if (platform === 'linkedin') return !!localConfig.linkedin?.accessToken;
     if (platform === 'instagram') return !!localConfig.instagram?.accessToken;
     if (platform === 'tiktok') return !!localConfig.tiktok?.accessToken;
+    if (platform === 'facebook') return !!localConfig.facebook?.accessToken;
+    if (platform === 'googlebusiness') return !!localConfig.googlebusiness?.accessToken;
     return false;
   };
 
@@ -151,6 +154,13 @@ const ConnectionSettings: React.FC<ConnectionSettingsProps> = ({ isOpen, onClose
             )}
 
             {renderConnectionCard(
+              'facebook', 
+              'Facebook Page', 
+              <Facebook size={24} />, 
+              'Share updates to your Facebook Business Page.'
+            )}
+
+            {renderConnectionCard(
               'instagram', 
               'Instagram', 
               <Instagram size={24} />, 
@@ -162,6 +172,13 @@ const ConnectionSettings: React.FC<ConnectionSettingsProps> = ({ isOpen, onClose
               'TikTok', 
               <Video size={24} />, 
               'Upload short-form video content.'
+            )}
+
+            {renderConnectionCard(
+              'googlebusiness', 
+              'Google Business', 
+              <Store size={24} />, 
+              'Post updates and offers to Google Search/Maps.'
             )}
           </div>
 

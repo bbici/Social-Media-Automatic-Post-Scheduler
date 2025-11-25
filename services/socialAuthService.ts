@@ -1,3 +1,4 @@
+
 import { ApiConfig } from "../types";
 
 // Simulates an OAuth 2.0 Provider flow
@@ -105,6 +106,8 @@ const getPlatformEmoji = (p: string) => {
     case 'linkedin': return '💼';
     case 'instagram': return '📸';
     case 'tiktok': return '🎵';
+    case 'facebook': return '📘';
+    case 'googlebusiness': return '🏪';
     default: return '🔗';
   }
 }
@@ -122,6 +125,10 @@ const generateMockCredentials = (platform: string): any => {
       return { accessToken: `mock_graph_${token}`, accountId: '1784140000000000' };
     case 'tiktok':
       return { accessToken: `mock_tk_${token}`, openId: 'user_open_id_mock' };
+    case 'facebook':
+      return { accessToken: `mock_fb_${token}`, pageId: '1000888999' };
+    case 'googlebusiness':
+      return { accessToken: `mock_gbp_${token}`, locationId: 'locations/456789' };
     default:
       return {};
   }

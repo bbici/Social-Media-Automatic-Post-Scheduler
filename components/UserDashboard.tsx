@@ -4,7 +4,7 @@ import CreationStudio from './CreationStudio';
 import PlatformPreview from './PlatformPreview';
 import ConnectionSettings from './ConnectionSettings';
 import { generateSocialVariants } from '../services/geminiService';
-import { postToTwitter, postToLinkedIn, postToInstagram } from '../services/socialApiService';
+import { postToTwitter, postToLinkedIn, postToInstagram, postToFacebook, postToGoogleBusiness } from '../services/socialApiService';
 import { DraftContent, Platform, AdaptedPost, UserSettings, User } from '../types';
 import { Settings, LogOut, Zap, Layout, Sparkles, Rocket, Loader2, Eye, X } from 'lucide-react';
 import { useApiConfig } from '../contexts/ApiContext';
@@ -59,6 +59,12 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, impersona
         case 'instagram':
           success = await postToInstagram(post, apiConfig.instagram);
           break;
+        case 'facebook':
+          success = await postToFacebook(post, apiConfig.facebook);
+          break;
+        case 'googlebusiness':
+          success = await postToGoogleBusiness(post, apiConfig.googlebusiness);
+          break;
         case 'tiktok':
           await new Promise(resolve => setTimeout(resolve, 1500));
           success = true;
@@ -102,7 +108,7 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, impersona
   };
 
   const userSettings: UserSettings = {
-    activePlatforms: ['twitter', 'linkedin', 'instagram'],
+    activePlatforms: ['twitter', 'linkedin', 'instagram', 'facebook', 'googlebusiness'],
     userName: user.name,
     userHandle: user.name.toLowerCase().replace(/\s/g, ''),
     avatar: user.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`
@@ -205,20 +211,20 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, impersona
 
                {generatedPosts.length > 0 && (
                  <div className="flex items-center gap-2">
-                   <div className="bg-white border border-slate-200 rounded-lg p-1 flex">
+                   <div className="bg-white border border-slate-200 rounded-lg p-1 flex flex-wrap gap-1 max-w-[350px]">
                       <button 
                         onClick={() => setActiveTab('all')}
                         className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all ${activeTab === 'all' ? 'bg-slate-100 text-slate-900' : 'text-slate-500 hover:bg-slate-50'}`}
                       >
                         All
                       </button>
-                      {['twitter', 'linkedin', 'instagram', 'tiktok'].map((p) => (
+                      {['twitter', 'linkedin', 'facebook', 'instagram', 'tiktok', 'googlebusiness'].map((p) => (
                         <button 
                           key={p}
                           onClick={() => setActiveTab(p as Platform)}
                           className={`px-3 py-1.5 text-xs font-medium rounded-md capitalize transition-all ${activeTab === p ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:bg-slate-50'}`}
                         >
-                          {p}
+                          {p === 'googlebusiness' ? 'GBP' : p}
                         </button>
                       ))}
                    </div>
@@ -248,11 +254,11 @@ const UserDashboard: React.FC<UserDashboardProps> = ({ user, onLogout, impersona
                 <p className="text-slate-500 max-w-xs mb-6">
                   Use the studio on the left to draft your content. AI will automatically adapt it for Twitter, LinkedIn, Instagram and more.
                 </p>
-                <div className="flex gap-2 text-sm text-slate-400">
+                <div className="flex gap-2 text-sm text-slate-400 flex-wrap justify-center">
                   <span className="px-2 py-1 bg-slate-100 rounded">Twitter</span>
                   <span className="px-2 py-1 bg-slate-100 rounded">LinkedIn</span>
+                  <span className="px-2 py-1 bg-slate-100 rounded">Facebook</span>
                   <span className="px-2 py-1 bg-slate-100 rounded">Instagram</span>
-                  <span className="px-2 py-1 bg-slate-100 rounded">TikTok</span>
                 </div>
               </div>
             ) : (

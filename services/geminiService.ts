@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { 
   DraftContent, 
@@ -35,7 +36,9 @@ export const generateSocialVariants = async (
     twitter: "Twitter/X: Concise, conversational, and punchy. Under 280 characters. Use 1-2 relevant hashtags. Focus on 'What's happening' or a key insight.",
     linkedin: "LinkedIn: Professional yet personal. Use a 'Hook -> Value -> CTA' storytelling structure. Focus on industry insights, professional growth, or business lessons. Use 3-5 professional hashtags.",
     instagram: "Instagram: Visually descriptive and engaging. Use emojis and line breaks for readability. Include a block of 15-25 mixed volume hashtags at the end.",
-    tiktok: "TikTok: Viral, high-energy, and short. Focus on a strong 'hook' in the first sentence. Suggest a trending sound vibe in brackets if applicable. Use trending tags like #fyp plus niche tags."
+    tiktok: "TikTok: Viral, high-energy, and short. Focus on a strong 'hook' in the first sentence. Suggest a trending sound vibe in brackets if applicable. Use trending tags like #fyp plus niche tags.",
+    facebook: "Facebook: Community-focused and conversational. Encourage engagement (likes/comments). Slightly longer form is okay. Use 2-3 relevant hashtags.",
+    googlebusiness: "Google Business Profile: Update-focused and local SEO optimized. Professional tone. Include a clear Call to Action (e.g., 'Call us', 'Visit today'). No hashtags."
   };
 
   const specificInstructions = platforms

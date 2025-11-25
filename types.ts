@@ -1,5 +1,5 @@
 
-export type Platform = 'twitter' | 'linkedin' | 'instagram' | 'tiktok';
+export type Platform = 'twitter' | 'linkedin' | 'instagram' | 'tiktok' | 'facebook' | 'googlebusiness';
 
 export interface DraftContent {
   text: string;
@@ -41,6 +41,14 @@ export interface ApiConfig {
   tiktok?: {
     accessToken: string;
     openId: string;
+  };
+  facebook?: {
+    accessToken: string;
+    pageId: string;
+  };
+  googlebusiness?: {
+    accessToken: string;
+    locationId: string;
   };
 }
 
