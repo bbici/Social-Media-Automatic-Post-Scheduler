@@ -11,6 +11,19 @@ import {
 
 const getAI = () => new GoogleGenAI({ apiKey: process.env.API_KEY });
 
+// Helper to clean Markdown code blocks from JSON string
+const cleanJson = (text: string) => {
+  if (!text) return "{}";
+  let cleaned = text.trim();
+  // Remove markdown code blocks if present
+  if (cleaned.startsWith('```json')) {
+    cleaned = cleaned.replace(/^```json/, '').replace(/```$/, '');
+  } else if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```/, '').replace(/```$/, '');
+  }
+  return cleaned.trim();
+};
+
 export const generateSocialVariants = async (
   draft: DraftContent,
   platforms: Platform[]
@@ -30,13 +43,16 @@ export const generateSocialVariants = async (
     .filter(Boolean)
     .join('\n');
 
+  // Handle case where text is empty but media exists
+  const draftText = draft.text ? draft.text : "No text provided. Generate a caption based on the context of the attached media.";
+
   // We construct a prompt that asks for a JSON array of adaptations
   const prompt = `
     You are an expert Social Media Manager and Content Strategist. 
     Adapt the following draft content into optimized posts for these platforms: ${platforms.join(', ')}.
 
     ORIGINAL DRAFT:
-    "${draft.text}"
+    "${draftText}"
 
     MEDIA CONTEXT:
     Has Media: ${draft.mediaType !== 'none'}
@@ -105,7 +121,8 @@ export const generateSocialVariants = async (
     }
   });
 
-  const result = JSON.parse(response.text || "{}");
+  const cleanedText = cleanJson(response.text || "{}");
+  const result = JSON.parse(cleanedText);
   
   if (!result.variants) return [];
 
@@ -159,7 +176,8 @@ export const optimizeProfileWithGemini = async (data: ProfileData): Promise<Opti
     }
   });
 
-  return JSON.parse(response.text || "{}");
+  const cleanedText = cleanJson(response.text || "{}");
+  return JSON.parse(cleanedText);
 };
 
 export const generateLinkedInPost = async (data: PostGeneratorData): Promise<string> => {
@@ -235,5 +253,6 @@ export const analyzeProfilePhoto = async (base64Image: string): Promise<PhotoAna
     }
   });
 
-  return JSON.parse(response.text || "{}");
+  const cleanedText = cleanJson(response.text || "{}");
+  return JSON.parse(cleanedText);
 };

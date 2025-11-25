@@ -174,6 +174,9 @@ const CreationStudio: React.FC<CreationStudioProps> = ({ onGenerate, isGeneratin
     setDrafts(getDrafts());
   };
 
+  // Logic to determine if generation is allowed
+  const canGenerate = (!!text || !!media) && selectedPlatforms.length > 0 && !isGenerating;
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 h-full flex flex-col relative">
       <div className="mb-6 flex justify-between items-start">
@@ -381,9 +384,9 @@ const CreationStudio: React.FC<CreationStudioProps> = ({ onGenerate, isGeneratin
         </button>
         <button
           onClick={() => onGenerate({ text, media, mediaType, scheduledTime }, selectedPlatforms)}
-          disabled={!text || selectedPlatforms.length === 0 || isGenerating}
+          disabled={!canGenerate}
           className={`col-span-3 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-lg transition-all ${
-            !text || selectedPlatforms.length === 0 || isGenerating
+            !canGenerate
               ? 'bg-slate-200 text-slate-400 cursor-not-allowed'
               : 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white hover:shadow-xl hover:scale-[1.01]'
           }`}

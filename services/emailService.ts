@@ -5,7 +5,7 @@ const STORAGE_KEY = 'omnipost_email_config';
 
 // Default keys provided by user
 const DEFAULT_CONFIG = {
-  serviceId: 'service_demo_omnipost', // Note: You might need to update this to your specific Service ID (e.g., 'service_gmail')
+  serviceId: 'service_c4nwljb',
   templateId: 'template_lb9y1pu',
   publicKey: '2g4ntCEQeQPWjMuJM'
 };
@@ -31,8 +31,7 @@ export const clearEmailConfig = () => {
 
 export const isEmailConfigured = (): boolean => {
   const config = getEmailConfig();
-  // Consider configured if the key is not the old placeholder
-  return config.publicKey !== 'user_demo_key_12345' && config.publicKey.length > 5;
+  return config.publicKey.length > 5;
 };
 
 export const sendVerificationEmail = async (name: string, email: string, code: string): Promise<boolean> => {
