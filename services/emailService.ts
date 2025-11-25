@@ -1,27 +1,56 @@
 
 import emailjs from '@emailjs/browser';
 
-// NOTE: In a production environment, these IDs would come from your environment variables
-// You can get these by signing up at emailjs.com (Free Tier available)
-const SERVICE_ID = 'service_demo_omnipost'; 
-const TEMPLATE_ID = 'template_verification';
-const PUBLIC_KEY = 'user_demo_key_12345';
+const STORAGE_KEY = 'omnipost_email_config';
+
+// Default / Demo keys (Placeholders)
+const DEFAULT_CONFIG = {
+  serviceId: 'service_demo_omnipost',
+  templateId: 'template_verification',
+  publicKey: 'user_demo_key_12345'
+};
+
+export interface EmailConfig {
+  serviceId: string;
+  templateId: string;
+  publicKey: string;
+}
+
+export const getEmailConfig = (): EmailConfig => {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  return stored ? JSON.parse(stored) : DEFAULT_CONFIG;
+};
+
+export const saveEmailConfig = (config: EmailConfig) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+};
+
+export const clearEmailConfig = () => {
+  localStorage.removeItem(STORAGE_KEY);
+};
+
+export const isEmailConfigured = (): boolean => {
+  const config = getEmailConfig();
+  return config.serviceId !== DEFAULT_CONFIG.serviceId && 
+         config.publicKey !== DEFAULT_CONFIG.publicKey;
+};
 
 export const sendVerificationEmail = async (name: string, email: string, code: string): Promise<boolean> => {
-  console.log(`[EmailService] Preparing to send code ${code} to ${email}...`);
+  const config = getEmailConfig();
+  console.log(`[EmailService] Attempting to send code to ${email} using Service ID: ${config.serviceId}...`);
   
   try {
     // Attempt to send real email using EmailJS
     await emailjs.send(
-      SERVICE_ID,
-      TEMPLATE_ID,
+      config.serviceId,
+      config.templateId,
       {
         to_name: name,
         to_email: email,
         verification_code: code,
         message: `Welcome to OmniPost AI! Your verification code is: ${code}`
       },
-      PUBLIC_KEY
+      config.publicKey
     );
 
     console.log('[EmailService] ✅ Email sent successfully via EmailJS');
@@ -30,7 +59,6 @@ export const sendVerificationEmail = async (name: string, email: string, code: s
   } catch (error) {
     console.warn('[EmailService] ⚠️ Real email sending failed.'); 
     console.warn('Reason:', error);
-    console.log('This usually happens if the EmailJS Service ID, Template ID, or Public Key are invalid or not configured.');
     
     // CRITICAL FALLBACK: Log the code to console so the user can still verify their account and use the app.
     console.info(
@@ -38,7 +66,6 @@ export const sendVerificationEmail = async (name: string, email: string, code: s
       "background-color: #4f46e5; color: white; padding: 4px 8px; font-weight: bold; font-size: 14px; border-radius: 4px;"
     );
     
-    // Return true so the auth flow proceeds (User is created and UI moves to activation screen)
-    return true;
+    return false;
   }
 };

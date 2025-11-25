@@ -37,7 +37,7 @@ export const getAllUsers = (): User[] => {
   return users.map(({ password, activationCode, ...user }) => user as User);
 };
 
-export const registerUser = async (name: string, email: string, password: string): Promise<{ user: User }> => {
+export const registerUser = async (name: string, email: string, password: string): Promise<{ user: User; activationCode: string; emailSent: boolean }> => {
   initDB();
   const users: StoredUser[] = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || '[]');
   
@@ -65,16 +65,16 @@ export const registerUser = async (name: string, email: string, password: string
   };
 
   // Attempt to send verification email
-  await sendVerificationEmail(name, email, activationCode);
+  const emailSent = await sendVerificationEmail(name, email, activationCode);
 
   users.push(newUser);
   localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
   
   const { password: _, ...safeUser } = newUser;
-  return { user: safeUser as User };
+  return { user: safeUser as User, activationCode, emailSent };
 };
 
-export const resendVerificationCode = async (email: string): Promise<boolean> => {
+export const resendVerificationCode = async (email: string): Promise<{ code: string; emailSent: boolean }> => {
   initDB();
   const users: StoredUser[] = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || '[]');
   const userIndex = users.findIndex(u => u.email === email);
@@ -96,7 +96,9 @@ export const resendVerificationCode = async (email: string): Promise<boolean> =>
   users[userIndex].activationExpiresAt = newExpiration;
   localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
 
-  return await sendVerificationEmail(user.name, user.email, newCode);
+  const emailSent = await sendVerificationEmail(user.name, user.email, newCode);
+  
+  return { code: newCode, emailSent };
 };
 
 export const activateAccount = (email: string, code: string): User => {
