@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { DraftContent, Platform, PostTemplate, SavedDraft } from '../types';
 import { getTemplates, saveTemplate, deleteTemplate } from '../services/templateService';
@@ -15,7 +14,7 @@ const CreationStudio: React.FC<CreationStudioProps> = ({ onGenerate, isGeneratin
   const [media, setMedia] = useState<string | undefined>(undefined);
   const [originalMedia, setOriginalMedia] = useState<string | undefined>(undefined); // Allow undo
   const [mediaType, setMediaType] = useState<'image' | 'video' | 'none'>('none');
-  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(['twitter', 'linkedin', 'instagram']);
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(['twitter', 'linkedin', 'instagram', 'tiktok']);
   const [isEditing, setIsEditing] = useState(false);
   const [scheduledTime, setScheduledTime] = useState<string>('');
   

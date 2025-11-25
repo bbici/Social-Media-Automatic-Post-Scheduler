@@ -80,7 +80,8 @@ export interface User {
   avatar?: string;
   role: Role;
   joinedAt: number;
-  isVerified?: boolean; // New field for email activation
+  isVerified?: boolean;
+  isSuspended?: boolean; // New field for account suspension
 }
 
 export interface PostTemplate {

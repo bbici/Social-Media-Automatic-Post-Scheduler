@@ -17,28 +17,41 @@ export const generateSocialVariants = async (
 ): Promise<AdaptedPost[]> => {
   const ai = getAI();
 
+  // Define specific instructions for each platform to ensure high-quality output
+  const platformInstructions: Record<string, string> = {
+    twitter: "Twitter/X: Concise, conversational, and punchy. Under 280 characters. Use 1-2 relevant hashtags. Focus on 'What's happening' or a key insight.",
+    linkedin: "LinkedIn: Professional yet personal. Use a 'Hook -> Value -> CTA' storytelling structure. Focus on industry insights, professional growth, or business lessons. Use 3-5 professional hashtags.",
+    instagram: "Instagram: Visually descriptive and engaging. Use emojis and line breaks for readability. Include a block of 15-25 mixed volume hashtags at the end.",
+    tiktok: "TikTok: Viral, high-energy, and short. Focus on a strong 'hook' in the first sentence. Suggest a trending sound vibe in brackets if applicable. Use trending tags like #fyp plus niche tags."
+  };
+
+  const specificInstructions = platforms
+    .map(p => platformInstructions[p] || "")
+    .filter(Boolean)
+    .join('\n');
+
   // We construct a prompt that asks for a JSON array of adaptations
   const prompt = `
-    You are an expert Social Media Manager. 
-    I have a draft post. Please adapt it for the following platforms: ${platforms.join(', ')}.
+    You are an expert Social Media Manager and Content Strategist. 
+    Adapt the following draft content into optimized posts for these platforms: ${platforms.join(', ')}.
 
-    Original Text: "${draft.text}"
+    ORIGINAL DRAFT:
+    "${draft.text}"
+
+    MEDIA CONTEXT:
     Has Media: ${draft.mediaType !== 'none'}
     Media Type: ${draft.mediaType}
+    ${draft.mediaType === 'image' ? 'Note: The user has uploaded an image. Ensure the caption references or complements the visual elements.' : ''}
+    ${draft.mediaType === 'video' ? 'Note: The user has uploaded a video. The caption should encourage watching the video (e.g., "Wait for the end", "Sound on 🔊").' : ''}
 
-    ${draft.mediaType === 'image' ? 'NOTE: The user has uploaded an image. Ensure the caption references the visual content if possible.' : ''}
-
-    Instructions:
-    1. Twitter/X: Short, punchy, under 280 chars. No hashtags or max 1.
-    2. LinkedIn: Professional, storytelling format, business value focus. 3-5 hashtags.
-    3. Instagram: engaging caption, emojis, line breaks. 15-20 relevant hashtags.
-    4. TikTok: If video, write a catchy script/caption. If image, write a trending sound caption style.
+    PLATFORM INSTRUCTIONS:
+    ${specificInstructions}
 
     Return a JSON object containing an array "variants".
     Each item in "variants" must have:
     - "platform": string (one of the requested platforms)
     - "content": string (the post text/caption)
-    - "hashtags": array of strings
+    - "hashtags": array of strings (hashtags without the # symbol)
   `;
 
   // If there is an image, we send it to the model for context-aware captions

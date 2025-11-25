@@ -23,6 +23,7 @@ const initDB = () => {
       avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin',
       joinedAt: Date.now(),
       isVerified: true, // Admin is auto-verified
+      isSuspended: false,
       password: 'admin123'
     };
     localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify([defaultAdmin]));
@@ -31,7 +32,9 @@ const initDB = () => {
 
 export const getAllUsers = (): User[] => {
   initDB();
-  return JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || '[]');
+  // Return users without sensitive data
+  const users: StoredUser[] = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || '[]');
+  return users.map(({ password, activationCode, ...user }) => user as User);
 };
 
 export const registerUser = async (name: string, email: string, password: string): Promise<{ user: User }> => {
@@ -54,20 +57,15 @@ export const registerUser = async (name: string, email: string, password: string
     role: 'user', 
     avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${name}`,
     joinedAt: Date.now(),
-    isVerified: false, 
+    isVerified: false,
+    isSuspended: false, 
     activationCode: activationCode,
     activationExpiresAt: expiresAt,
     password: password
   };
 
-  try {
-     await sendVerificationEmail(name, email, activationCode);
-  } catch (error) {
-     console.error("Email sending failed", error);
-     console.info(`%c[DEV MODE] Activation Code for ${email}: ${activationCode}`, "color: #4f46e5; font-weight: bold; font-size: 14px;");
-     // We still throw so UI knows email failed, but user is technically created
-     throw error;
-  }
+  // Attempt to send verification email
+  await sendVerificationEmail(name, email, activationCode);
 
   users.push(newUser);
   localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
@@ -98,14 +96,7 @@ export const resendVerificationCode = async (email: string): Promise<boolean> =>
   users[userIndex].activationExpiresAt = newExpiration;
   localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
 
-  try {
-    await sendVerificationEmail(user.name, user.email, newCode);
-    console.info(`%c[DEV MODE] New Activation Code for ${email}: ${newCode}`, "color: #4f46e5; font-weight: bold; font-size: 14px;");
-    return true;
-  } catch (error) {
-    console.error("Failed to resend email", error);
-    return false;
-  }
+  return await sendVerificationEmail(user.name, user.email, newCode);
 };
 
 export const activateAccount = (email: string, code: string): User => {
@@ -124,7 +115,6 @@ export const activateAccount = (email: string, code: string): User => {
     return safeUser as User;
   }
 
-  // Check Expiration
   if (user.activationExpiresAt && Date.now() > user.activationExpiresAt) {
     throw new Error('Activation code has expired. Please resend a new code.');
   }
@@ -133,7 +123,6 @@ export const activateAccount = (email: string, code: string): User => {
     throw new Error('Invalid activation code.');
   }
 
-  // Activate user
   users[userIndex].isVerified = true;
   users[userIndex].activationCode = undefined; 
   users[userIndex].activationExpiresAt = undefined;
@@ -161,8 +150,38 @@ export const loginUser = (email: string, password: string): User => {
     throw new Error('Account not activated. Please verify your email.');
   }
 
+  if (user.isSuspended) {
+    throw new Error('Account suspended. Contact support.');
+  }
+
   const { password: _, activationCode: __, ...safeUser } = user;
   return safeUser as User;
+};
+
+// Admin Functions
+
+export const deleteUser = (userId: string): void => {
+  const users: StoredUser[] = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || '[]');
+  const newUsers = users.filter(u => u.id !== userId);
+  localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(newUsers));
+};
+
+export const updateUserStatus = (userId: string, isSuspended: boolean): void => {
+  const users: StoredUser[] = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || '[]');
+  const index = users.findIndex(u => u.id === userId);
+  if (index !== -1) {
+    users[index].isSuspended = isSuspended;
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+  }
+};
+
+export const updateUserRole = (userId: string, role: 'user' | 'admin'): void => {
+  const users: StoredUser[] = JSON.parse(localStorage.getItem(USERS_STORAGE_KEY) || '[]');
+  const index = users.findIndex(u => u.id === userId);
+  if (index !== -1) {
+    users[index].role = role;
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+  }
 };
 
 export const getCurrentSession = (): User | null => {
